@@ -307,7 +307,8 @@ class BasicAgentAA(BustersAgent):
         pacmanDirection = gameState.data.agentStates[0].getDirection()
         print(pacmanDirection)
         # Last move was Y axis, priorize axis X (default)
-        if (pacmanDirection is None or pacmanDirection is Directions.STOP) or (pacmanDirection is Directions.SOUTH or pacmanDirection is Directions.NORTH):
+        if (pacmanDirection is None or pacmanDirection is Directions.STOP) or (
+                pacmanDirection is Directions.SOUTH or pacmanDirection is Directions.NORTH):
             if closestGhostPosition[0] < pacmanPos[0]:
                 move = Directions.WEST
             elif closestGhostPosition[0] > pacmanPos[0]:
@@ -348,13 +349,33 @@ class BasicAgentAA(BustersAgent):
         # Stuck stuff -> try to move to another axis (note that it's not circular or biyective).
         # EAST -> NORTH; NORTH -> EAST; WEST -> SOUTH; SOUTH -> WEST
         if pacmanDirection is Directions.EAST:
-            return Directions.NORTH
+            move = Directions.NORTH
         elif pacmanDirection is Directions.WEST:
-            return Directions.SOUTH
+            move = Directions.SOUTH
         elif pacmanDirection is Directions.NORTH:
-            return Directions.EAST
+            move = Directions.EAST
         elif pacmanDirection is Directions.SOUTH:
-            return Directions.WEST
+            move = Directions.WEST
+
+        # Only legal moves ahead our stocastical movements.
+        if move in legal:
+            return move
+
+        # In case we can't move left, move right. In case we can't move up, move down. If this does not work, map is wrong, so we just STOP. We may just wait.
+        move = Directions.REVERSE[move]
+        if move in legal:
+            return move
+
+        # As a desperation movement. Rand it! Break the walls!! This happens when we have tons of walls nearby at the beginning.
+
+        move_random = random.randint(0, 3)
+        if (move_random == 0) and Directions.WEST in legal:  return Directions.WEST
+        if (move_random == 1) and Directions.EAST in legal: return Directions.EAST
+        if (move_random == 2) and Directions.NORTH in legal:   return Directions.NORTH
+        if (move_random == 3) and Directions.SOUTH in legal: return Directions.SOUTH
+
+        # No way. Just stop. Wait for a beer
+        return Directions.STOP
 
     def printLineData(self, gameState):
         securityDistance = 5  # Hardcoded security distance
