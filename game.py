@@ -651,7 +651,7 @@ class Game(object):
                 # test_samemaps_tutorial1.arff -> 200 NEW instances, 5 maps (20Hunt, bigHunt, capsuleClassic, classic, contestClassic), random ghosts, random control
                 # test_othermaps_tutorial1.arff -> 200 NEW instances, 5 maps (mediumClassic, Minimapa, minimaxClassic, newMap, oneHunt), random ghosts, random control
 
-                fPath = "training_keyboard.arff"
+                fPath = "test_othermaps_tutorial1.arff"
                 # agentType = type(agent)
                 # if agentType == 'ghostAgents.RandomGhost':
                 #     fPath = "all_data_pacman.arff"
