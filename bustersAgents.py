@@ -38,7 +38,7 @@ def printLineDataGlobal(self, gameState):
     # [ghostsNearby] -> can be NULL or ; separated idx of the ghosts
     # TODO -> scoreSiguiente al final
 
-    pacman_next_dir = 'STOP'
+    pacman_next_dir = 'Stop'
     next_score = '0'
     return posStr + "," + nearestDotDistanceStr + "," + str(gameState.data.layout.getNumGhosts()) + "," + str(
         gameState.getScore()) + "," + str(len(gameState.data.layout.capsules)) + "," + gameState.data.agentStates[
