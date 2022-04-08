@@ -23,28 +23,6 @@ import inference
 import busters
 
 
-def printLineDataGlobal(self, gameState):
-    securityDistance = 5  # Hardcoded security distance
-    posStr = str(gameState.getPacmanPosition()[0]) + "," + str(gameState.getPacmanPosition()[1])
-    unsafeGhostsStr = ""
-    unsafeGhostsNearby = False
-    for idx, distance in enumerate(gameState.data.ghostDistances):
-        if distance <= securityDistance and distance is not None:
-            unsafeGhostsStr += str(idx) + ";"
-            unsafeGhostsNearby = True
-    if unsafeGhostsNearby: unsafeGhostsStr = unsafeGhostsStr[:-1]  # remove last ;
-    nearestDotDistanceStr = str(gameState.getDistanceNearestFood())
-    # positionX,positionY,[ghostsNearby],nearestDotDistance,pacmanDirection
-    # [ghostsNearby] -> can be NULL or ; separated idx of the ghosts
-    # TODO -> scoreSiguiente al final
-
-    pacman_next_dir = 'Stop'
-    next_score = '0'
-    return posStr + "," + nearestDotDistanceStr + "," + str(gameState.data.layout.getNumGhosts()) + "," + str(
-        gameState.getScore()) + "," + str(len(gameState.data.layout.capsules)) + "," + gameState.data.agentStates[
-               0].getDirection() + "," + pacman_next_dir + "," + next_score
-
-
 class NullGraphics(object):
     "Placeholder for graphics"
 
@@ -71,9 +49,6 @@ class KeyboardInference(inference.InferenceModule):
     """
     Basic inference module for use with the keyboard.
     """
-
-    def printLineData(self, gameState):
-        return printLineDataGlobal(self, gameState)
 
     def initializeUniformly(self, gameState):
         "Begin with a uniform distribution over ghost positions."
@@ -102,9 +77,6 @@ class KeyboardInference(inference.InferenceModule):
 
 class BustersAgent(object):
     "An agent that tracks and displays its beliefs about ghost positions."
-
-    def printLineData(self, gameState):
-        return printLineDataGlobal(self, gameState)
 
     def __init__(self, index=0, inference="ExactInference", ghostAgents=None, observeEnable=True,
                  elapseTimeEnable=True):
@@ -148,9 +120,6 @@ class BustersAgent(object):
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     "An agent controlled by the keyboard that displays beliefs about ghost positions."
 
-    def printLineData(self, gameState):
-        return printLineDataGlobal(self, gameState)
-
     def __init__(self, index=0, inference="KeyboardInference", ghostAgents=None):
         KeyboardAgent.__init__(self, index)
         BustersAgent.__init__(self, index, inference, ghostAgents)
@@ -175,9 +144,6 @@ class RandomPAgent(BustersAgent):
     def registerInitialState(self, gameState):
         BustersAgent.registerInitialState(self, gameState)
         self.distancer = Distancer(gameState.data.layout, False)
-
-    def printLineData(self, gameState):
-        return printLineDataGlobal(self, gameState)
 
     ''' Example of counting something'''
 
@@ -214,9 +180,6 @@ class RandomPAgent(BustersAgent):
 
 class GreedyBustersAgent(BustersAgent):
     "An agent that charges the closest ghost."
-
-    def printLineData(self, gameState):
-        return printLineDataGlobal(self, gameState)
 
     def registerInitialState(self, gameState):
         "Pre-computes the distance between every two points."
@@ -261,9 +224,6 @@ class GreedyBustersAgent(BustersAgent):
 
 
 class BasicAgentAA(BustersAgent):
-
-    def printLineData(self, gameState):
-        return printLineDataGlobal(self, gameState)
 
     def registerInitialState(self, gameState):
         BustersAgent.registerInitialState(self, gameState)
@@ -416,3 +376,19 @@ class BasicAgentAA(BustersAgent):
 
         # No way. Just stop. Wait for a beer
         return Directions.STOP
+
+    def printLineData(self, gameState):
+        securityDistance = 5  # Hardcoded security distance
+
+        posStr = str(gameState.getPacmanPosition()[0]) + ";" + str(gameState.getPacmanPosition()[1])
+        unsafeGhostsStr = ""
+        unsafeGhostsNearby = False
+        for idx, distance in enumerate(gameState.data.ghostDistances):
+            if distance <= securityDistance and distance is not None:
+                unsafeGhostsStr += str(idx) + ";"
+                unsafeGhostsNearby = True
+        if unsafeGhostsNearby: unsafeGhostsStr = unsafeGhostsStr[:-1]  # remove last ;
+        nearestDotDistanceStr = str(gameState.getDistanceNearestFood())
+        # positionX;positionY,[ghostsNearby],nearestDotDistance
+        # [ghostsNearby] -> can be NULL or ; separated idx of the ghosts
+        return posStr + "," + unsafeGhostsStr + "," + nearestDotDistanceStr
