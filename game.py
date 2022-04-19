@@ -1,32 +1,6 @@
-from __future__ import print_function
-from __future__ import division
 # game.py
 # -------
-# Licensing Information:  You are free to use or extend these projects for
-# educational purposes provided that (1) you do not distribute or publish
-# solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley.
-# 
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
-# The core projects and autograders were primarily created by John DeNero
-# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# Student side autograding was added by Brad Miller, Nick Hay, and
-# Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
-# game.py
-# -------
-# Licensing Information: Please do not distribute or publish solutions to this
-# project. You are free to use and extend these projects for educational
-# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
-# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import range
-from past.utils import old_div
-from builtins import object
 from util import *
 import time, os
 import traceback
@@ -36,7 +10,7 @@ import sys
 # Parts worth reading #
 #######################
 
-class Agent(object):
+class Agent:
     """
     An agent must define a getAction method, but may also define the
     following methods which will be called if they exist:
@@ -53,7 +27,7 @@ class Agent(object):
         """
         raiseNotDefined()
 
-class Directions(object):
+class Directions:
     NORTH = 'North'
     SOUTH = 'South'
     EAST = 'East'
@@ -74,7 +48,7 @@ class Directions(object):
                WEST: EAST,
                STOP: STOP}
 
-class Configuration(object):
+class Configuration:
     """
     A Configuration holds the (x,y) coordinate of a character, along with its
     traveling direction.
@@ -124,7 +98,7 @@ class Configuration(object):
             direction = self.direction # There is no stop direction
         return Configuration((x + dx, y+dy), direction)
 
-class AgentState(object):
+class AgentState:
     """
     AgentStates hold the state of an agent (configuration, speed, scared, etc).
     """
@@ -156,7 +130,6 @@ class AgentState(object):
         state.configuration = self.configuration
         state.scaredTimer = self.scaredTimer
         state.numCarrying = self.numCarrying
-        state.numReturned = self.numReturned
         return state
 
     def getPosition(self):
@@ -166,7 +139,7 @@ class AgentState(object):
     def getDirection(self):
         return self.configuration.getDirection()
 
-class Grid(object):
+class Grid:
     """
     A 2-dimensional array of objects backed by a list of lists.  Data is accessed
     via grid[x][y] where (x,y) are positions on a Pacman map with x horizontal,
@@ -253,7 +226,7 @@ class Grid(object):
         return tuple(bits)
 
     def _cellIndexToPosition(self, index):
-        x = old_div(index, self.height)
+        x = index / self.height
         y = index % self.height
         return x, y
 
@@ -291,7 +264,7 @@ def reconstituteGrid(bitRep):
 # Parts you shouldn't have to read #
 ####################################
 
-class Actions(object):
+class Actions:
     """
     A collection of static methods for manipulating move actions.
     """
@@ -375,7 +348,7 @@ class Actions(object):
         return (x + dx, y + dy)
     getSuccessor = staticmethod(getSuccessor)
 
-class GameStateData(object):
+class GameStateData:
     """
 
     """
@@ -496,7 +469,6 @@ class GameStateData(object):
         Creates an initial game state from a layout array (see layout.py).
         """
         self.food = layout.food.copy()
-        #self.capsules = []
         self.capsules = layout.capsules[:]
         self.layout = layout
         self.score = 0
@@ -517,7 +489,7 @@ try:
 except:
     _BOINC_ENABLED = False
 
-class Game(object):
+class Game:
     """
     The Game manages the control flow, soliciting actions from agents.
     """
@@ -556,7 +528,12 @@ class Game(object):
 
     def mute(self, agentIndex):
         if not self.muteAgents: return
-
+        global OLD_STDOUT, OLD_STDERR
+        import io
+        OLD_STDOUT = sys.stdout
+        OLD_STDERR = sys.stderr
+        sys.stdout = self.agentOutput[agentIndex]
+        sys.stderr = self.agentOutput[agentIndex]
 
     def unmute(self):
         if not self.muteAgents: return
@@ -564,6 +541,7 @@ class Game(object):
         # Revert stdout/stderr to originals
         sys.stdout = OLD_STDOUT
         sys.stderr = OLD_STDERR
+
 
     def run( self ):
         """
@@ -580,11 +558,10 @@ class Game(object):
                 self.mute(i)
                 # this is a null agent, meaning it failed to load
                 # the other team wins
-                print("Agent %d failed to load" % i, file=sys.stderr)
+                print("Agent %d failed to load" % i)
                 self.unmute()
                 self._agentCrash(i, quiet=True)
                 return
-
             if ("registerInitialState" in dir(agent)):
                 self.mute(i)
                 if self.catchExceptions:
@@ -596,7 +573,7 @@ class Game(object):
                             time_taken = time.time() - start_time
                             self.totalAgentTimes[i] += time_taken
                         except TimeoutFunctionException:
-                            print("Agent %d ran out of time on startup!" % i, file=sys.stderr)
+                            print("Agent %d ran out of time on startup!" % i)
                             self.unmute()
                             self.agentTimeout = True
                             self._agentCrash(i, quiet=True)
@@ -612,18 +589,12 @@ class Game(object):
 
         agentIndex = self.startingIndex
         numAgents = len( self.agents )
-        step = 0
+
         while not self.gameOver:
             # Fetch the next agent
             agent = self.agents[agentIndex]
             move_time = 0
             skip_action = False
-            if hasattr(agent, 'printLineData'):
-                f = open("traces.csv", "a")
-                f.write(agent.printLineData(self.state) + "\n")
-                f.close()
-
-                
             # Generate an observation of the state
             if 'observationFunction' in dir( agent ):
                 self.mute(agentIndex)
@@ -646,9 +617,9 @@ class Game(object):
                 self.unmute()
             else:
                 observation = self.state.deepCopy()
+
             # Solicit an action
             action = None
-            step += 1
             self.mute(agentIndex)
             if self.catchExceptions:
                 try:
@@ -659,7 +630,7 @@ class Game(object):
                             raise TimeoutFunctionException()
                         action = timed_func( observation )
                     except TimeoutFunctionException:
-                        print("Agent %d timed out on a single move!" % agentIndex, file=sys.stderr)
+                        print("Agent %d timed out on a single move!" % agentIndex)
                         self.agentTimeout = True
                         self._agentCrash(agentIndex, quiet=True)
                         self.unmute()
@@ -669,9 +640,9 @@ class Game(object):
 
                     if move_time > self.rules.getMoveWarningTime(agentIndex):
                         self.totalAgentTimeWarnings[agentIndex] += 1
-                        print("Agent %d took too long to make a move! This is warning %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
+                        print("Agent %d took too long to make a move! This is warning %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]))
                         if self.totalAgentTimeWarnings[agentIndex] > self.rules.getMaxTimeWarnings(agentIndex):
-                            print("Agent %d exceeded the maximum number of warnings: %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
+                            print("Agent %d exceeded the maximum number of warnings: %d" % (agentIndex, self.totalAgentTimeWarnings[agentIndex]))
                             self.agentTimeout = True
                             self._agentCrash(agentIndex, quiet=True)
                             self.unmute()
@@ -680,7 +651,7 @@ class Game(object):
                     self.totalAgentTimes[agentIndex] += move_time
                     #print "Agent: %d, time: %f, total: %f" % (agentIndex, move_time, self.totalAgentTimes[agentIndex])
                     if self.totalAgentTimes[agentIndex] > self.rules.getMaxTotalTime(agentIndex):
-                        print("Agent %d ran out of time! (time: %1.2f)" % (agentIndex, self.totalAgentTimes[agentIndex]), file=sys.stderr)
+                        print("Agent %d ran out of time! (time: %1.2f)" % (agentIndex, self.totalAgentTimes[agentIndex]))
                         self.agentTimeout = True
                         self._agentCrash(agentIndex, quiet=True)
                         self.unmute()

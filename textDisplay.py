@@ -1,30 +1,16 @@
 from __future__ import print_function
 # textDisplay.py
 # --------------
-# Licensing Information:  You are free to use or extend these projects for
-# educational purposes provided that (1) you do not distribute or publish
-# solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley.
-# 
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
-# The core projects and autograders were primarily created by John DeNero
-# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# Student side autograding was added by Brad Miller, Nick Hay, and
-# Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
 from builtins import str
 from builtins import range
 from builtins import object
-import time
-try: 
-    import pacman
-except:
-    pass
+import pacman, time
 
 DRAW_EVERY = 1
 SLEEP_TIME = 0 # This can be overwritten by __init__
-DISPLAY_MOVES = True
+DISPLAY_MOVES = False
 QUIET = False # Supresses output
 
 class NullGraphics(object):
@@ -34,17 +20,11 @@ class NullGraphics(object):
     def update(self, state):
         pass
 
-    def checkNullDisplay(self):
-        return True
-
     def pause(self):
         time.sleep(SLEEP_TIME)
 
     def draw(self, state):
         print(state)
-
-    def updateDistributions(self, dist):
-        pass
 
     def finish(self):
         pass
@@ -68,7 +48,7 @@ class PacmanGraphics(object):
             self.turn += 1
             if DISPLAY_MOVES:
                 ghosts = [pacman.nearestPoint(state.getGhostPosition(i)) for i in range(1, numAgents)]
-                print("%4d) P: %-8s" % (self.turn, str(pacman.nearestPoint(state.getPacmanPosition()))),'| Score: %-5d' % state.score,'| Ghosts:', ghosts)
+                print(("%4d) P: %-8s" % (self.turn, str(pacman.nearestPoint(state.getPacmanPosition()))),'| Score: %-5d' % state.score,'| Ghosts:', ghosts))
             if self.turn % DRAW_EVERY == 0:
                 self.draw(state)
                 self.pause()

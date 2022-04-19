@@ -1,15 +1,5 @@
 # busters.py
 # ----------
-# Licensing Information:  You are free to use or extend these projects for
-# educational purposes provided that (1) you do not distribute or publish
-# solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley.
-# 
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
-# The core projects and autograders were primarily created by John DeNero
-# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# Student side autograding was added by Brad Miller, Nick Hay, and
-# Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
 """
@@ -20,8 +10,8 @@ readings to each remaining ghost.
 To play your first game, type 'python pacman.py' from the command line.
 The keys are 'a', 's', 'd', and 'w' to move (or arrow keys).  Have fun!
 """
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 from builtins import zip
 from builtins import str
 from builtins import range
@@ -49,8 +39,7 @@ SONAR_NOISE_PROBS = [old_div(2 ** (SONAR_MAX-abs(v)), SONAR_DENOMINATOR)  for v 
 def getNoisyDistance(pos1, pos2):
     if pos2[1] == 1: return None
     distance = util.manhattanDistance(pos1, pos2)
-    # return max(0, distance + util.sample(SONAR_NOISE_PROBS, SONAR_NOISE_VALUES))
-    return distance
+    return max(0, distance + util.sample(SONAR_NOISE_PROBS, SONAR_NOISE_VALUES))
 
 observationDistributions = {}
 def getObservationDistribution(noisyDistance):
@@ -90,14 +79,12 @@ class GameState(object):
     ####################################################
     # Accessor methods: use these to access state data #
     ####################################################
-    ghostDirections = {}
 
     def getLegalActions( self, agentIndex=0 ):
         """
         Returns the legal actions for the agent specified.
         """
-        if self.isWin() or self.isLose():
-            return []
+        if self.isWin() or self.isLose(): return []
 
         if agentIndex == 0:  # Pacman is moving
             return PacmanRules.getLegalActions( self )
@@ -130,19 +117,11 @@ class GameState(object):
         # Resolve multi-agent effects
         GhostRules.checkDeath( state, agentIndex )
 
-        # Check food eaten
-        GhostRules.checkFoodEaten ( state, agentIndex )
-
         # Book keeping
         state.data._agentMoved = agentIndex
         state.data.score += state.data.scoreChange
         p = state.getPacmanPosition()
         state.data.ghostDistances = [getNoisyDistance(p, state.getGhostPosition(i)) for i in range(1,state.getNumAgents())]
-        state.ghostPositions = self.ghostPositions = [self.getGhostPosition(i) for i in range(1, self.getNumAgents())]
-        a = 0
-        for i in range(1, self.getNumAgents()):
-            self.ghostDirections[a] = (state.data.agentStates[i].configuration.getDirection())
-            a += 1
         if agentIndex == self.getNumAgents() - 1:
             state.numMoves += 1
         return state
@@ -225,31 +204,6 @@ class GameState(object):
         """
         return self.livingGhosts
 
-    def getDistanceNearestFood(self):
-        """
-        Returns the distance to the nearest food
-        """
-        if(self.getNumFood() > 0):
-            minDistance = 900000
-            pacmanPosition = self.getPacmanPosition()
-            for i in range(self.data.layout.width):
-                for j in range(self.data.layout.height):
-                    if self.hasFood(i, j):
-                        foodPosition = i, j
-                        distance = util.manhattanDistance(pacmanPosition, foodPosition)
-                        if distance < minDistance:
-                            minDistance = distance
-            return minDistance
-
-        else:
-            return None;
-
-    def getGhostPositions(self):
-        return self.ghostPositions
-
-    def getGhostDirections(self):
-        return self.ghostDirections
-
     def setGhostNotLiving(self, index):
         self.livingGhosts[index] = False
 
@@ -277,14 +231,13 @@ class GameState(object):
         if prevState != None:
             self.data = GameStateData(prevState.data)
             self.livingGhosts = prevState.livingGhosts[:]
-            self.ghostPositions = prevState.ghostPositions[:]
             self.numMoves = prevState.numMoves;
             self.maxMoves = prevState.maxMoves;
         else: # Initial state
             self.data = GameStateData()
             self.numMoves = 0;
             self.maxMoves = -1;
-            self.data.ghostDistances = []
+        self.data.ghostDistances = []
 
     def deepCopy( self ):
         state = GameState( self )
@@ -296,9 +249,7 @@ class GameState(object):
         """
         Allows two states to be compared.
         """
-        if (other):
-            return self.data == other.data
-        
+        return self.data == other.data
 
     def __hash__( self ):
         """
@@ -317,20 +268,15 @@ class GameState(object):
         self.data.initialize(layout, numGhostAgents)
         self.livingGhosts = [False] + [True for i in range(numGhostAgents)]
         self.data.ghostDistances = [getNoisyDistance(self.getPacmanPosition(), self.getGhostPosition(i)) for i in range(1, self.getNumAgents())]
-        self.ghostPositions = [self.getGhostPosition(i) for i in range(1, self.getNumAgents())]
 
     def getGhostPosition( self, agentIndex ):
         if agentIndex == 0:
-            raise Exception("Pacman's index passed to getGhostPosition")
+            raise "Pacman's index passed to getGhostPosition"
         return self.data.agentStates[agentIndex].getPosition()
-    def getGhostDirection( self, agentIndex ):
-        if agentIndex == 0:
-            raise Exception("Pacman's index passed to getGhostDirection")
-        return self.data.agentStates[agentIndex].getDirection()
 
     def getGhostState( self, agentIndex ):
         if agentIndex == 0:
-            raise Exception("Pacman's index passed to getGhostPosition")
+            raise "Pacman's index passed to getGhostPosition"
         return self.data.agentStates[agentIndex]
 
 ############################################################################
@@ -388,7 +334,7 @@ class PacmanRules(object):
         """
         legal = PacmanRules.getLegalActions( state )
         if action not in legal:
-            raise Exception("Illegal action", action)
+            raise "Illegal action", action
 
         pacmanState = state.data.agentStates[0]
 
@@ -438,16 +384,6 @@ class GhostRules(object):
             if GhostRules.canKill( pacmanPosition, ghostPosition ):
                 GhostRules.collide( state, ghostState, agentIndex )
     checkDeath = staticmethod( checkDeath )
-
-    def checkFoodEaten( state, agentIndex):
-        pacmanPosition = state.getPacmanPosition()
-        if agentIndex == 0: # Pacman just moved; Anyone can kill him
-            if state.hasFood(pacmanPosition[0], pacmanPosition[1]):
-                state.data._foodEaten = pacmanPosition[0], pacmanPosition[1]
-                state.data.food[pacmanPosition[0]][pacmanPosition[1]] = False
-                state.data.scoreChange += 100
-    checkFoodEaten = staticmethod( checkFoodEaten )
-
 
     def collide( state, ghostState, agentIndex):
         state.data.scoreChange += 200
@@ -522,7 +458,7 @@ def readCommand( argv ):
                       help='Comma seperated values sent to agent. e.g. "opt1=val1,opt2,opt3=val3"')
     parser.add_option('-g', '--ghosts', dest='ghost',
                       help=default('the ghost agent TYPE in the ghostAgents module to use'),
-                      metavar = 'TYPE', default='StaticGhost')
+                      metavar = 'TYPE', default='RandomGhost')
     parser.add_option('-q', '--quietTextGraphics', action='store_true', dest='quietGraphics',
                       help='Generate minimal output and no graphics', default=False)
     parser.add_option('-k', '--numghosts', type='int', dest='numGhosts',
@@ -532,7 +468,7 @@ def readCommand( argv ):
     parser.add_option('-f', '--fixRandomSeed', action='store_true', dest='fixRandomSeed',
                       help='Fixes the random seed to always play the same game', default=False)
     parser.add_option('-s', '--showGhosts', action='store_true', dest='showGhosts',
-                      help='Renders the ghosts in the display (cheating)', default=True)
+                      help='Renders the ghosts in the display (cheating)', default=False)
     parser.add_option('-t', '--frameTime', dest='frameTime', type='float',
                       help=default('Time to delay between frames; <0 means keyboard'), default=0.1)
 
@@ -607,10 +543,10 @@ def runGames( layout, pacman, ghosts, display, numGames, maxMoves=-1):
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True)/ float(len(wins))
-        print('Average Score:', sum(scores) / float(len(scores)))
-        print('Scores:       ', ', '.join([str(score) for score in scores]))
+        print(('Average Score:', sum(scores) / float(len(scores))))
+        print(('Scores:       ', ', '.join([str(score) for score in scores])))
         print('Win Rate:      %d/%d (%.2f)' % (wins.count(True), len(wins), winRate))
-        print('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins]))
+        print(('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])))
 
     return games
 

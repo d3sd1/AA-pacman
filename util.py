@@ -1,28 +1,14 @@
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 # util.py
 # -------
-# Licensing Information:  You are free to use or extend these projects for
-# educational purposes provided that (1) you do not distribute or publish
-# solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley.
-# 
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
-# The core projects and autograders were primarily created by John DeNero
-# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# Student side autograding was added by Brad Miller, Nick Hay, and
-# Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
-from future import standard_library
-standard_library.install_aliases()
-from builtins import input
 from builtins import zip
+from builtins import input
 from builtins import str
 from builtins import range
 from past.utils import old_div
 from builtins import object
-from future.utils import raise_
 import sys
 import inspect
 import heapq, random
@@ -440,7 +426,7 @@ def raiseNotDefined():
     fileName = inspect.stack()[1][1]
     line = inspect.stack()[1][2]
     method = inspect.stack()[1][3]
-
+    
     print("*** Method not implemented: %s at line %s of %s" % (method, line, fileName))
     sys.exit(1)
 
@@ -481,7 +467,7 @@ def nSample(distribution, values, n):
 
 def sample(distribution, values = None):
     if type(distribution) == Counter:
-        items = sorted(distribution.items())
+        items = list(distribution.items())
         distribution = [i[1] for i in items]
         values = [i[0] for i in items]
     if sum(distribution) != 1:
@@ -494,7 +480,7 @@ def sample(distribution, values = None):
     return values[i]
 
 def sampleFromCounter(ctr):
-    items = sorted(ctr.items())
+    items = list(ctr.items())
     return sample([v for k,v in items], [k for k,v in items])
 
 def getProbability(value, distribution, values):
@@ -574,28 +560,27 @@ def lookup(name, namespace):
         module = __import__(moduleName)
         return getattr(module, objName)
     else:
-        modules = [obj for obj in list(namespace.values()) if
-                   (str(type(obj)) == "<class 'module'>" or str(type(obj)) ==  "<type 'module'>" )]
+        modules = [obj for obj in list(namespace.values()) if str(type(obj)) == "<type 'module'>"]
         options = [getattr(module, name) for module in modules if name in dir(module)]
         options += [obj[1] for obj in list(namespace.items()) if obj[0] == name ]
         if len(options) == 1: return options[0]
         if len(options) > 1: raise Exception('Name conflict for %s')
-        raise_(Exception, '%s not found as a method or class' % name)
+        raise Exception('%s not found as a method or class' % name)
 
 def pause():
     """
     Pauses the output stream awaiting user feedback.
     """
     print("<Press enter/return to continue>")
-    input()
+    eval(input())
 
 
 # code to handle timeouts
 #
 # FIXME
-# NOTE: TimeoutFuncton is NOT reentrant.  Later timeouts will silently
-# disable earlier timeouts.  Could be solved by maintaining a global list
-# of active time outs.  Currently, questions which have test cases calling
+# NOTE: TimeoutFuncton is NOT reentrant.  Later timeouts will silently 
+# disable earlier timeouts.  Could be solved by maintaining a global list 
+# of active time outs.  Currently, questions which have test cases calling 
 # this have all student code so wrapped.
 #
 import signal
@@ -642,13 +627,13 @@ _MUTED = False
 class WritableNull(object):
     def write(self, string):
         pass
-
+ 
 def mutePrint():
     global _ORIGINAL_STDOUT, _ORIGINAL_STDERR, _MUTED
-    if _MUTED:
+    if _MUTED: 
         return
     _MUTED = True
-
+    
     _ORIGINAL_STDOUT = sys.stdout
     #_ORIGINAL_STDERR = sys.stderr
     sys.stdout = WritableNull()
@@ -656,10 +641,10 @@ def mutePrint():
 
 def unmutePrint():
     global _ORIGINAL_STDOUT, _ORIGINAL_STDERR, _MUTED
-    if not _MUTED:
+    if not _MUTED: 
         return
     _MUTED = False
-
+    
     sys.stdout = _ORIGINAL_STDOUT
     #sys.stderr = _ORIGINAL_STDERR
-
+    

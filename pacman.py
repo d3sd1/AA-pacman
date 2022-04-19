@@ -1,17 +1,5 @@
 # pacman.py
 # ---------
-# Licensing Information:  You are free to use or extend these projects for
-# educational purposes provided that (1) you do not distribute or publish
-# solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley.
-# 
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
-# The core projects and autograders were primarily created by John DeNero
-# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# Student side autograding was added by Brad Miller, Nick Hay, and
-# Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
-
 """
 Pacman.py holds the logic for the classic pacman game along with the main
 code to run a game.  This file is divided into three sections:
@@ -40,8 +28,6 @@ To play your first game, type 'python pacman.py' from the command line.
 The keys are 'a', 's', 'd', and 'w' to move (or arrow keys).  Have fun!
 """
 from __future__ import print_function
-from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from builtins import object
@@ -89,7 +75,7 @@ class GameState(object):
         """
         Returns the legal actions for the agent specified.
         """
-#        GameState.explored.add(self)
+        GameState.explored.add(self)
         if self.isWin() or self.isLose(): return []
 
         if agentIndex == 0:  # Pacman is moving
@@ -126,8 +112,6 @@ class GameState(object):
         # Book keeping
         state.data._agentMoved = agentIndex
         state.data.score += state.data.scoreChange
-        GameState.explored.add(self)
-        GameState.explored.add(state)
         return state
 
     def getLegalPacmanActions( self ):
@@ -171,7 +155,7 @@ class GameState(object):
         return len( self.data.agentStates )
 
     def getScore( self ):
-        return float(self.data.score)
+        return self.data.score
 
     def getCapsules(self):
         """
@@ -241,7 +225,7 @@ class GameState(object):
         """
         Allows two states to be compared.
         """
-        return hasattr(other, 'data') and self.data == other.data
+        return self.data == other.data
 
     def __hash__( self ):
         """
@@ -550,8 +534,6 @@ def readCommand( argv ):
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining
     pacman = pacmanType(**agentOpts) # Instantiate Pacman with agentArgs
-    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    print(pacman)
     args['pacman'] = pacman
 
     # Don't display training games
@@ -666,10 +648,10 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True)/ float(len(wins))
-        print('Average Score:', sum(scores) / float(len(scores)))
-        print('Scores:       ', ', '.join([str(score) for score in scores]))
+        print(('Average Score:', sum(scores) / float(len(scores))))
+        print(('Scores:       ', ', '.join([str(score) for score in scores])))
         print('Win Rate:      %d/%d (%.2f)' % (wins.count(True), len(wins), winRate))
-        print('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins]))
+        print(('Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])))
 
     return games
 
